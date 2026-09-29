@@ -22,3 +22,7 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Local development startup scripts
+start-dev.bat
+start-dev.txt
