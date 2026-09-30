@@ -5,7 +5,7 @@ function App() {
   const [imageName, setImageName] = useState("");
 
   const fetchInspections = async () => {
-    const response = await fetch("http://localhost:8000/inspections");
+    const response = await fetch("/api/inspections");
     const data = await response.json();
 
     setInspections(data);
@@ -19,7 +19,7 @@ function App() {
     }
 
     await fetch(
-      `http://localhost:8000/inspections?image_name=${encodeURIComponent(imageName)}`,
+      `/api/inspections?image_name=${encodeURIComponent(imageName)}`,
       {
         method: "POST",
       }
