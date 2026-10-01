@@ -1,0 +1,40 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches:
+      - main
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/ai-inspection-platform
+
+            git pull origin main
+
+            source .venv/bin/activate
+
+            uv pip install -r backend/requirements.txt
+
+            cd frontend
+            npm ci
+            npm run build
+
+            sudo rm -rf /var/www/ai-inspection/*
+            sudo cp -r dist/* /var/www/ai-inspection/
+
+            sudo systemctl restart ai-inspection
+            sudo systemctl reload nginx
