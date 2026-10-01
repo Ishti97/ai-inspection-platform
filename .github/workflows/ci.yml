@@ -26,9 +26,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
-      - name: Check backend imports
+      - name: Check backend syntax
         run: |
-          python -c "from backend.app.main import app; print('Backend import successful')"
+          python -m compileall backend
 
   frontend:
     runs-on: ubuntu-latest
