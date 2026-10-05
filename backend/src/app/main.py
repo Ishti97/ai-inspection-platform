@@ -1,13 +1,15 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-
+from prometheus_fastapi_instrumentator import Instrumentator
 from .database import Base, engine, get_db
 from .models import Inspection
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="AI Inspection Platform")
+
+Instrumentator().instrument(app).expose(app)
 
 app.add_middleware(
     CORSMiddleware,
