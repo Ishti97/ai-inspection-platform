@@ -1,14 +1,27 @@
 import { useEffect, useState } from "react";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function App() {
   const [inspections, setInspections] = useState([]);
   const [imageName, setImageName] = useState("");
+  const [backendStatus, setBackendStatus] = useState("Checking...");
 
   const fetchInspections = async () => {
-    const response = await fetch("/api/inspections");
-    const data = await response.json();
+    try {
+      const response = await fetch(`${API_URL}/inspections`);
 
-    setInspections(data);
+      if (!response.ok) {
+        throw new Error("Failed to fetch inspections");
+      }
+
+      const data = await response.json();
+      setInspections(data);
+      setBackendStatus("Connected");
+    } catch (error) {
+      console.error(error);
+      setBackendStatus("Disconnected");
+    }
   };
 
   const createInspection = async (event) => {
@@ -18,15 +31,23 @@ function App() {
       return;
     }
 
-    await fetch(
-      `/api/inspections?image_name=${encodeURIComponent(imageName)}`,
-      {
-        method: "POST",
-      }
-    );
+    try {
+      const response = await fetch(
+        `${API_URL}/inspections?image_name=${encodeURIComponent(imageName)}`,
+        {
+          method: "POST",
+        }
+      );
 
-    setImageName("");
-    fetchInspections();
+      if (!response.ok) {
+        throw new Error("Failed to create inspection");
+      }
+
+      setImageName("");
+      fetchInspections();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   useEffect(() => {
@@ -37,7 +58,7 @@ function App() {
     <div>
       <h1>AI Inspection Platform</h1>
 
-      <p>Backend status: Connected</p>
+      <p>Backend status: {backendStatus}</p>
 
       <form onSubmit={createInspection}>
         <input
@@ -47,9 +68,7 @@ function App() {
           onChange={(event) => setImageName(event.target.value)}
         />
 
-        <button type="submit">
-          Create Inspection
-        </button>
+        <button type="submit">Create Inspection</button>
       </form>
 
       <h2>Inspections</h2>
